@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+    <meta charset="utf-8">
+    <title>Таблица товаров</title>
+
+    <script type="text/javascript">
+        fetch("index.json")
+            .then(function (response) {
+                return response.json();
+            })
+            .then(function (products) {
+                let placeholder = document.querySelector("#data-output");
+                let out = "";
+                let id = 1;
+                for (let product of products) {
+                    out += `
+            <tr>
+              <td>${id}</td>
+              <td>${product.name}</td>
+              <td>${product.quantity}</td>
+              <td id="priceId${id++}">${product.price}</td>
+              <td>${product.price * product.quantity}</td>
+            </tr>
+          `;
+                }
+                placeholder.innerHTML = out;
+            })
+    </script>
+    <script type="text/javascript">
+        function filter(l, r) {
+            let rowQty = document.getElementById("myTable").tBodies[0].rows.length + 1;
+            showTable(rowQty, l, r);
+            document.getElementById("errMsg").style.display = 'none';
+            if (l > r)
+                errMsgAlert("Минимальная цена не может превышать максимальную");
+            if (l < 0 || r < 0 || l > 10000 || r > 10000)
+                errMsgAlert("Минимальная и максимальная цена должна входить в диапозон от 0 до 10 000");
+            if (l + r != 0)
+                if (!(filterRows(rowQty, l, r)))
+                    errMsgAlert("Нет данных, попадающих под условие фильтра");
+        }
+        function filterRows(rQty, l, r) {
+            let b = false;
+            for (let i = 1; i < rQty; i++) {
+                let tmpRow = document.getElementById(`priceId${i}`).innerText;
+                if (tmpRow > l && tmpRow < r) {
+                    document.getElementById(`priceId${i}`).parentNode.style.display = 'table-row';
+                    b = true
+                }
+                else
+                    document.getElementById(`priceId${i}`).parentNode.style.display = 'none';
+            }
+            return b;
+        }
+        function showTable(rQty, l, r) {
+            document.getElementById('myTable').style.display = 'table';
+            for (let i = 1; i < rQty; i++) {
+                document.getElementById(`priceId${i}`).parentNode.style.display = 'table-row';
+            }
+        }
+        function errMsgAlert(msg) {
+            document.getElementById('myTable').style.display = 'none';
+            document.getElementById("errMsg").style.display = 'block';
+            document.getElementById("errMsg").innerHTML = `${msg}`;
+        }
+    </script>
+    <style>
+        .mid {
+            margin-left: auto;
+            margin-right: auto;
+            text-align: center;
+        }
+
+        .mainTxt {
+            font-size: 12px;
+            vertical-align: middle;
+            line-height: 3rem;
+            height: 3rem;
+        }
+
+        .dis {
+            display: inline-block;
+        }
+
+        .btnUpd {
+            display: inline-block;
+            text-align: center;
+            vertical-align: middle;
+            line-height: 20px;
+            margin-left: 2rem;
+            text-decoration: none;
+            color: black;
+            font-size: 14px;
+            border-radius: 7%;
+            width: 100px;
+            height: 25px;
+            border: 1px solid black;
+            transition: 0.3s;
+            background-color: E6E6E6;
+            cursor: pointer;
+        }
+
+        .btnUpd:hover {
+            box-shadow: 0 0 10px #fff;
+        }
+
+        .btnUpd:active {
+            transform: scale(0.95);
+        }
+
+        #myTable {
+            margin: 1rem auto 0 auto;
+            font-family: 'helvetica neue', helvetica, arial, 'lucida grande', sans-serif;
+            border-collapse: collapse;
+            border: 1px solid #000000;
+        }
+
+        #myTable td {
+            border-top: solid 1px #000000;
+            padding: 10px;
+            font-size: 12px;
+            text-align: left;
+        }
+
+        #myTable tr {
+            background-color: white;
+            color: #000000;
+        }
+
+        #myTable tr:hover {
+            background-color: #FFFFFF;
+            color: #000000;
+        }
+
+        #myTable th {
+            border: solid 0px white;
+            padding: 10px;
+            color: #000000;
+            background-color: #CCCCCC;
+            text-align: left;
+            font-size: 12px;
+        }
+
+        #errMsg {
+            font-size: 24px;
+            vertical-align: middle;
+            line-height: 3rem;
+            height: 3rem;
+            text-align: center;
+        }
+
+        body {
+            background: white;
+            color: black;
+            font-family: 'lucida grande', sans-serif;
+        }
+    </style>
+</head>
+
+<body>
+    <form>
+        <div class='mid'>
+            <p class='mainTxt dis'>Цена от: </p>
+            <input class='dis' type="number" name="left" placeholder="0" min="0" max="10000">
+            <p class='mainTxt dis'> до: </p>
+            <input class='dis' type="number" name="right" placeholder="10000" min="0" max="10000">
+            <button onmousedown="filter(Number(left.value),Number(right.value))" type="button" class="btnUpd">Обновить
+        </div>
+        </div>
+        <table id="myTable" width="735px">
+            <thead>
+                <tr>
+                    <th style="width: 50px;">ID</th>
+                    <th style="width: 200px;">Название</th>
+                    <th style="width: 200px;">Количество</th>
+                    <th style="width: 200px;">Цена за единицу</th>
+                    <th style="width: 85px;">Сумма</th>
+                </tr>
+            </thead>
+
+            <tbody id="data-output">
+
+            </tbody>
+        </table>
+        <h1 id="errMsg"></h1>
+    </form>
+</body>
+
+</html>
